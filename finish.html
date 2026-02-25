@@ -2,27 +2,44 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>完成</title>
+<title>刷题系统 - 完成</title>
 <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
 <div class="container">
-<div class="card center">
+  <div class="card center">
 
-<h1>🎉 恭喜完成全部题目</h1>
+    <h1>🎉 恭喜你答完所有题目！</h1>
+    <div class="muted">是否选择重新答题？</div>
 
-<button onclick="restart()">重新答题</button>
+    <div class="footer-actions" style="justify-content:center;">
+      <button onclick="restart()">重新答题</button>
+      <button class="btn-ghost" onclick="logout()">退出登录</button>
+    </div>
 
-</div>
+  </div>
 </div>
 
 <script>
-function restart(){
-    localStorage.clear()
-    location="quiz.html"
-}
+  // 未登录则回登录页（防止直接访问完成页）
+  if(localStorage.getItem("login")!=="1"){
+    location="index.html";
+  }
+
+  function restart(){
+    // 只清进度，不清 login（关键修复）
+    localStorage.setItem("current","0");
+    localStorage.setItem("finished","0");
+    location="quiz.html";
+  }
+
+  function logout(){
+    localStorage.removeItem("login");
+    localStorage.removeItem("current");
+    localStorage.removeItem("finished");
+    location="index.html";
+  }
 </script>
 
 </body>
