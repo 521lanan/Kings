@@ -2,26 +2,32 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>登录</title>
+<title>刷题系统 - 登录</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
 <div class="container">
-<div class="card">
+  <div class="card">
+    <div class="header">
+      <div class="brand">🔐 轻蓝刷题系统</div>
+      <span class="badge">仅允许表内账号登录</span>
+    </div>
 
-<h2>🔐 刷题系统登录</h2>
+    <h2>登录</h2>
+    <div class="muted">账号密码来自仓库的 <b>users.xlsx</b>（不提供注册入口）</div>
 
-<input id="user" placeholder="用户名">
-<input id="pass" type="password" placeholder="密码">
+    <input id="user" placeholder="用户名">
+    <input id="pass" type="password" placeholder="密码">
 
-<button onclick="login()">登录</button>
+    <div class="footer-actions">
+      <button id="loginBtn" onclick="login()" disabled>正在加载账号...</button>
+      <button class="btn-ghost" onclick="clearMsg()">清除提示</button>
+    </div>
 
-<p id="msg"></p>
-
-</div>
+    <p id="msg" class="muted"></p>
+  </div>
 </div>
 
 <script src="login.js"></script>
