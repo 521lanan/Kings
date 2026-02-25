@@ -2,27 +2,38 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>刷题</title>
+<title>刷题系统 - 做题</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
 <div class="container">
-<div class="card">
+  <div class="card">
 
-<h1>📘 刷题</h1>
+    <div class="header">
+      <div class="brand">📘 轻蓝刷题系统</div>
+      <button class="btn-ghost" onclick="logout()">退出登录</button>
+    </div>
 
-<div class="progress-bar">
-<div id="bar" class="progress-inner"></div>
-</div>
+    <div class="progress-wrap">
+      <div class="progress-top">
+        <span id="progressText" class="badge">进度：0/0</span>
+        <span id="percentText" class="muted">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div id="bar" class="progress-inner"></div>
+      </div>
+    </div>
 
-<div id="quiz"></div>
+    <div id="quiz"></div>
 
-<button onclick="next()">下一题</button>
+    <div class="footer-actions">
+      <button id="nextBtn" onclick="next()" disabled>下一题</button>
+      <button class="btn-ghost" onclick="restartProgress()">重新从第一题开始</button>
+    </div>
 
-</div>
+  </div>
 </div>
 
 <script src="script.js"></script>
