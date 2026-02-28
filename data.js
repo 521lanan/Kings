@@ -1,20 +1,42 @@
 let USERS = [];
 
 async function loadUsers() {
-  if (USERS.length > 0) return USERS;
 
-  const res = await fetch("users.xlsx", { cache: "no-store" });
-  const buf = await res.arrayBuffer();
+  // 强制重新加载
+  USERS = [];
 
-  const wb = XLSX.read(buf, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
+  if (typeof XLSX === "undefined") {
+    throw new Error("XLSX 未加载，请检查 index.html 是否引入 xlsx.full.min.js");
+  }
+
+  const response = await fetch("./users.xlsx?v=" + Date.now(), {
+    cache: "no-store"
+  });
+
+  if (!response.ok) {
+    throw new Error("无法访问 users.xlsx，HTTP状态：" + response.status);
+  }
+
+  const buffer = await response.arrayBuffer();
+  const workbook = XLSX.read(buffer, { type: "array" });
+  const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
   USERS = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+  if (USERS.length === 0) {
+    throw new Error("users.xlsx 读取成功但没有数据");
+  }
+
   return USERS;
 }
 
 function checkUserCredentials(username, password) {
-  // 在 USERS 数组中查找匹配的用户名和密码
-  const user = USERS.find(u => u.username === username && u.password === password);
-  return user !== undefined;
+
+  username = String(username).trim();
+  password = String(password);
+
+  return USERS.some(user =>
+    String(user.username).trim() === username &&
+    String(user.password) === password
+  );
 }
