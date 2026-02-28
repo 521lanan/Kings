@@ -167,3 +167,65 @@ button:disabled{
 .center{
   text-align:center;
 }
+/* ===== Quiz Options Interaction ===== */
+.option {
+  width: 100%;
+  text-align: left;
+  margin: 10px 0;
+  padding: 14px 14px;
+  border-radius: 14px;
+  border: 1px solid #d6e9ff;
+  background: #f3f8ff;
+  color: #163a63;
+  box-shadow: none;
+  cursor: pointer;
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
+}
+
+.option:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(0,0,0,.08);
+}
+
+/* ✅ 选中（未提交前） */
+.option.is-selected {
+  border-color: #5aa9ff;
+  outline: 4px solid rgba(90,169,255,.18);
+  background: #eaf4ff;
+  box-shadow: 0 12px 26px rgba(90,169,255,.18);
+}
+
+/* ✅ 提交后锁定（不可再选） */
+.option.is-locked {
+  cursor: default;
+  opacity: .95;
+}
+
+/* ✅ 正确选项 */
+.option.is-correct {
+  background: #e9fff2;
+  border-color: #45c07a;
+  color: #0f5a33;
+  outline: 4px solid rgba(69,192,122,.15);
+}
+
+/* ✅ 错误选择（用户点错的那个） */
+.option.is-wrong {
+  background: #ffecec;
+  border-color: #ff7b7b;
+  color: #8a1f1f;
+  outline: 4px solid rgba(255,123,123,.12);
+}
+
+/* ✅ 提交后未选中的其他选项（弱化） */
+.option.is-dim {
+  opacity: .65;
+}
+
+/* 结果提示更清晰 */
+.result {
+  margin-top: 12px;
+  font-weight: 800;
+}
+.result.ok { color:#1f9d5a; }
+.result.no { color:#d13d3d; }
