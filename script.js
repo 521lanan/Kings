@@ -7,16 +7,16 @@ let questions = [];
 let current = Number(localStorage.getItem("current") || 0);
 let finished = Number(localStorage.getItem("finished") || 0);
 
-// 交互状态
-let answered = false;          // 是否已提交
-let selectedChoice = null;     // 当前选中的选项 'A'/'B'/'C'/'D'
-let locked = false;            // 提交后锁定不允许再选
+let answered = false;          // 是否已提交（提交后才能下一题）
+let locked = false;            // 提交后锁定选项
+let selectedChoice = null;     // 当前选中的选项
 
 const quizEl = document.getElementById("quiz");
 const barEl = document.getElementById("bar");
 const progressTextEl = document.getElementById("progressText");
 const percentTextEl = document.getElementById("percentText");
 const nextBtn = document.getElementById("nextBtn");
+const submitBtn = document.getElementById("submitBtn");
 
 fetch("questions.xlsx", { cache: "no-store" })
   .then(res => {
@@ -61,10 +61,14 @@ function show() {
   }
 
   const q = questions[current];
+
+  // 重置状态
   answered = false;
   locked = false;
   selectedChoice = null;
-  nextBtn.disabled = true;
+
+  nextBtn.disabled = true;     // 未提交前不能下一题
+  submitBtn.disabled = true;   // 未选中前不能提交
 
   const idx = current + 1;
   const total = questions.length;
@@ -85,23 +89,19 @@ function show() {
   updateProgress();
 }
 
-// 第一次点击：选中高亮；第二次点同一个：提交
+// 第一步：只选中，不提交
 function selectOption(choice) {
   if (locked) return;
 
-  // 第一次点：只选中高亮
-  if (selectedChoice !== choice) {
-    selectedChoice = choice;
-    document.querySelectorAll(".option").forEach(btn => {
-      btn.classList.remove("is-selected");
-    });
-    const btn = document.querySelector(`.option[data-choice="${choice}"]`);
-    if (btn) btn.classList.add("is-selected");
-    return;
-  }
+  selectedChoice = choice;
+  submitBtn.disabled = false; // 选中后可以提交
 
-  // 第二次点同一个：提交判定
-  check(choice);
+  document.querySelectorAll(".option").forEach(btn => {
+    btn.classList.remove("is-selected");
+  });
+
+  const btn = document.querySelector(`.option[data-choice="${choice}"]`);
+  if (btn) btn.classList.add("is-selected");
 }
 
 function lockOptions() {
@@ -111,57 +111,54 @@ function lockOptions() {
   });
 }
 
+// 提交后：正确/错误样式反馈
 function markAfterSubmit(picked, correct) {
   const optionBtns = document.querySelectorAll(".option");
 
-  // 先弱化全部
   optionBtns.forEach(btn => {
     btn.classList.remove("is-correct", "is-wrong");
     btn.classList.add("is-dim");
   });
 
-  // 标记正确答案
+  // 正确答案标绿
   const correctBtn = document.querySelector(`.option[data-choice="${correct}"]`);
   if (correctBtn) {
     correctBtn.classList.remove("is-dim");
     correctBtn.classList.add("is-correct");
   }
 
-  // 标记用户选择
+  // 用户选择标红/标绿
   const pickedBtn = document.querySelector(`.option[data-choice="${picked}"]`);
   if (pickedBtn) {
     pickedBtn.classList.remove("is-dim");
-    if (picked === correct) {
-      pickedBtn.classList.add("is-correct");
-    } else {
-      pickedBtn.classList.add("is-wrong");
-    }
+    pickedBtn.classList.add("is-selected");
+    if (picked === correct) pickedBtn.classList.add("is-correct");
+    else pickedBtn.classList.add("is-wrong");
   }
 }
 
-function check(choice) {
-  const q = questions[current];
+// 第二步：点击提交按钮才判题并显示解析
+function submitAnswer() {
+  if (locked) return;
 
-  // 允许答案为空：你还没填答案时也能提交并看解析
+  if (!selectedChoice) {
+    alert("请先选择一个选项再提交");
+    return;
+  }
+
+  const q = questions[current];
   const correct = String(q.answer ?? "").trim().toUpperCase();
 
   const resultEl = document.getElementById("result");
   const explainEl = document.getElementById("explain");
 
   lockOptions();
+  submitBtn.disabled = true; // 提交后不能再提交
 
-  // 未设置答案：只显示已提交 + 解析，并保持选中高亮
+  // 若答案为空：也显示解析
   if (!correct) {
     resultEl.className = "result";
     resultEl.innerText = "✅ 已提交（本题暂未设置答案）";
-
-    // 弱化其他，保留选中高亮
-    document.querySelectorAll(".option").forEach(btn => btn.classList.add("is-dim"));
-    const pickedBtn = document.querySelector(`.option[data-choice="${choice}"]`);
-    if (pickedBtn) {
-      pickedBtn.classList.remove("is-dim");
-      pickedBtn.classList.add("is-selected");
-    }
 
     explainEl.style.display = "block";
     explainEl.innerText = "解析： " + (q.explain ?? "");
@@ -171,10 +168,10 @@ function check(choice) {
     return;
   }
 
-  // 正确/错误样式反馈
-  markAfterSubmit(choice, correct);
+  // 正确/错误反馈
+  markAfterSubmit(selectedChoice, correct);
 
-  const ok = choice === correct;
+  const ok = selectedChoice === correct;
   resultEl.className = "result " + (ok ? "ok" : "no");
   resultEl.innerText = ok ? "✅ 正确" : `❌ 错误（正确答案：${correct}）`;
 
@@ -185,9 +182,10 @@ function check(choice) {
   nextBtn.disabled = false;
 }
 
+// 第三步：下一题
 function next() {
   if (!answered) {
-    alert("请先选择答案查看解析，再进入下一题");
+    alert("请先提交答案查看解析，再进入下一题");
     return;
   }
 
