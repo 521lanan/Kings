@@ -7,7 +7,7 @@ let questions = [];
 let current = Number(localStorage.getItem("current") || 0);
 let finished = Number(localStorage.getItem("finished") || 0);
 
-let answered = false;          // 是否已提交（提交后才能下一题）
+let answered = false;          // 是否已提交
 let locked = false;            // 提交后锁定选项
 let selectedChoice = null;     // 当前选中的选项
 
@@ -18,7 +18,7 @@ const percentTextEl = document.getElementById("percentText");
 const nextBtn = document.getElementById("nextBtn");
 const submitBtn = document.getElementById("submitBtn");
 
-fetch("questions.xlsx", { cache: "no-store" })
+fetch("./questions.xlsx?v=" + Date.now(), { cache: "no-store" })  // 使用强制刷新，避免浏览器缓存
   .then(res => {
     if (!res.ok) throw new Error("questions.xlsx 加载失败");
     return res.arrayBuffer();
@@ -34,8 +34,8 @@ fetch("questions.xlsx", { cache: "no-store" })
 
     show();
   })
-  .catch(() => {
-    quizEl.innerHTML = `<h3>题库读取失败</h3><div class="muted">请确认 questions.xlsx 在仓库根目录，且列名包含 question/A/B/C/D/answer/explain</div>`;
+  .catch(err => {
+    quizEl.innerHTML = `<h3>题库读取失败</h3><div class="muted">${err.message}</div>`;
   });
 
 function escapeHtml(s) {
@@ -61,8 +61,6 @@ function show() {
   }
 
   const q = questions[current];
-
-  // 重置状态
   answered = false;
   locked = false;
   selectedChoice = null;
@@ -132,8 +130,11 @@ function markAfterSubmit(picked, correct) {
   if (pickedBtn) {
     pickedBtn.classList.remove("is-dim");
     pickedBtn.classList.add("is-selected");
-    if (picked === correct) pickedBtn.classList.add("is-correct");
-    else pickedBtn.classList.add("is-wrong");
+    if (picked === correct) {
+      pickedBtn.classList.add("is-correct");
+    } else {
+      pickedBtn.classList.add("is-wrong");
+    }
   }
 }
 
