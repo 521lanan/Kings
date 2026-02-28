@@ -1,4 +1,4 @@
-let users=[]
+let users = []
 const msgEl = document.getElementById("msg")
 const btnEl = document.getElementById("loginBtn")
 
@@ -15,12 +15,19 @@ fetch("users.xlsx")
     const sheet = wb.Sheets[wb.SheetNames[0]]
     users = XLSX.utils.sheet_to_json(sheet)
 
-    msgEl.innerText = ""
     btnEl.disabled = false
+    btnEl.innerText = "登录"
+    msgEl.innerText = ""
   })
-  .catch(err => {
-    msgEl.innerText = "账号文件读取失败，请检查 users.xlsx 是否在仓库根目录"
+  .catch(() => {
+    msgEl.innerText = "账号文件读取失败：请确认 users.xlsx 在仓库根目录且文件名完全一致"
+    btnEl.disabled = true
+    btnEl.innerText = "无法登录"
   })
+
+function clearMsg(){
+  msgEl.innerText = ""
+}
 
 function login(){
   const u = document.getElementById("user").value.trim()
@@ -35,11 +42,13 @@ function login(){
 
   if(ok){
     localStorage.setItem("login","1")
-    // 登录成功时，如果之前有进度就继续，没有就从0开始
+
+    // 初始化进度（如无则从0开始；如有则续做）
     if(localStorage.getItem("current")===null) localStorage.setItem("current","0")
     if(localStorage.getItem("finished")===null) localStorage.setItem("finished","0")
-    window.location="quiz.html"
+
+    window.location = "quiz.html"
   }else{
-    msgEl.innerText="账号密码错误"
+    msgEl.innerText = "账号或密码错误"
   }
 }
